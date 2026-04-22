@@ -276,6 +276,10 @@ app.post('/v1/messages', async c => {
       usage: { input_tokens: inputTokens, output_tokens: outputTokens },
     })
     await write('message_stop', { type: 'message_stop' })
+    recordCost('local', decision.localModel, {
+      input_tokens: inputTokens,
+      output_tokens: outputTokens,
+    })
     log(`POST ${body.model} → lmstudio stream ok ${Date.now() - start}ms in=${inputTokens} out=${outputTokens}`)
   })
 })
