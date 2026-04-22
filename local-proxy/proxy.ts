@@ -1,5 +1,6 @@
 import { Hono } from 'hono'
 import { streamSSE } from 'hono/streaming'
+import { snapshot } from './cost'
 
 const ANTHROPIC_API = process.env.ANTHROPIC_UPSTREAM ?? 'https://api.anthropic.com'
 const LMSTUDIO_API = process.env.LMSTUDIO_URL ?? 'http://127.0.0.1:1234'
@@ -122,6 +123,7 @@ function openAIToAnthropic(resp: any, originalModel: string) {
 const app = new Hono()
 
 app.get('/health', c => c.text('ok'))
+app.get('/stats', c => c.json(snapshot()))
 
 app.post('/v1/messages', async c => {
   const body = (await c.req.json()) as AnthropicRequest
