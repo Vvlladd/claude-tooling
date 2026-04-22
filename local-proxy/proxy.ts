@@ -1,6 +1,7 @@
 import { Hono } from 'hono'
 import { streamSSE } from 'hono/streaming'
 import { record as recordCost, snapshot } from './cost'
+import { extractAnthropicUsage } from './extract-usage'
 
 const ANTHROPIC_API = process.env.ANTHROPIC_UPSTREAM ?? 'https://api.anthropic.com'
 const LMSTUDIO_API = process.env.LMSTUDIO_URL ?? 'http://127.0.0.1:1234'
@@ -146,7 +147,10 @@ app.post('/v1/messages', async c => {
     log(`POST ${body.model} → anthropic ${upstream.status} ${Date.now() - start}ms`)
     const headers = new Headers(upstream.headers)
     for (const h of HOP_BY_HOP) headers.delete(h)
-    return new Response(upstream.body, {
+    const observed = extractAnthropicUsage(upstream, body.stream ?? false, usage => {
+      recordCost('anthropic', body.model, usage)
+    })
+    return new Response(observed.body, {
       status: upstream.status,
       headers,
     })
