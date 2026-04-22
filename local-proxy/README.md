@@ -15,7 +15,7 @@ Tiny Anthropic-Messages → OpenAI-Chat-Completions shim so Claude Code can rout
 ### 1. Clone and install
 
 ```bash
-git clone <repo-url> claude-tooling
+git clone https://github.com/Vvlladd/claude-tooling
 cd claude-tooling/local-proxy
 bun install
 ```
