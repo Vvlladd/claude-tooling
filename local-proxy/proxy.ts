@@ -1,6 +1,6 @@
 import { Hono } from 'hono'
 import { streamSSE } from 'hono/streaming'
-import { snapshot } from './cost'
+import { record as recordCost, snapshot } from './cost'
 
 const ANTHROPIC_API = process.env.ANTHROPIC_UPSTREAM ?? 'https://api.anthropic.com'
 const LMSTUDIO_API = process.env.LMSTUDIO_URL ?? 'http://127.0.0.1:1234'
@@ -174,7 +174,13 @@ app.post('/v1/messages', async c => {
   }
 
   if (!body.stream) {
-    const data = await upstream.json()
+    const data = await upstream.json() as {
+      usage?: { prompt_tokens?: number; completion_tokens?: number }
+    }
+    recordCost('local', decision.localModel, {
+      input_tokens: data.usage?.prompt_tokens ?? 0,
+      output_tokens: data.usage?.completion_tokens ?? 0,
+    })
     log(`POST ${body.model} → lmstudio ${upstream.status} ${Date.now() - start}ms`)
     return c.json(openAIToAnthropic(data, body.model))
   }
