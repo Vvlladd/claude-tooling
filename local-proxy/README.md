@@ -175,6 +175,50 @@ curl -N http://127.0.0.1:8787/v1/messages \
   }'
 ```
 
+## Cost tracking
+
+The proxy keeps a per-session running total of your Anthropic spend (cache-aware) and an estimate of what local-routed requests would have cost at haiku rates. Totals are in-memory and reset on restart.
+
+Fetch them any time:
+
+```bash
+curl -s http://127.0.0.1:8787/stats | jq
+```
+
+Example response:
+
+```json
+{
+  "session": { "started_at": "2026-04-22T10:23:11Z", "uptime_ms": 1320000 },
+  "totals": {
+    "anthropic_usd": 0.4231,
+    "local_saved_usd_est": 1.182,
+    "requests": { "anthropic": 94, "local": 48 }
+  },
+  "per_model": {
+    "claude-sonnet-4-5-20250929": {
+      "requests": 94,
+      "input_tokens": 18420,
+      "output_tokens": 3102,
+      "cache_read_tokens": 214800,
+      "cache_creation_tokens": 12800,
+      "usd": 0.4231
+    },
+    "local/qwen2.5-coder-32b-instruct": {
+      "requests": 48,
+      "input_tokens": 28100,
+      "output_tokens": 9240,
+      "usd_saved_est": 1.182
+    }
+  }
+}
+```
+
+- **`anthropic_usd`** — real spend on Anthropic-routed requests, using per-component pricing (input / output / cache_read / cache_creation).
+- **`local_saved_usd_est`** — what those local requests would have cost at Claude haiku-4-5 rates. Deliberately conservative — the real counterfactual for a sonnet-grade task would be higher.
+- Unknown model IDs record token counts but their `usd` is `0`.
+- No persistence. If you need monthly totals, keep the proxy running or watch this endpoint externally.
+
 ## Known limitations
 
 - No tool-use translation. Tool requests bypass LM Studio entirely.

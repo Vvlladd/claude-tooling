@@ -5,7 +5,8 @@
   "private": true,
   "scripts": {
     "start": "bun run proxy.ts",
-    "dev": "bun --hot proxy.ts"
+    "dev": "bun --hot proxy.ts",
+    "test": "bun test"
   },
   "dependencies": {
     "hono": "^4.6.14"
