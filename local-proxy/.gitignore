@@ -1,0 +1,9 @@
+node_modules
+bun.lockb
+bun.lock
+*.log
+
+# Secrets — keep .env.example, ignore everything else
+.env
+.env.*
+!.env.example

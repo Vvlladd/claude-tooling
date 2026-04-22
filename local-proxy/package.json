@@ -1,0 +1,16 @@
+{
+  "name": "local-proxy",
+  "version": "0.1.0",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "start": "bun run proxy.ts",
+    "dev": "bun --hot proxy.ts"
+  },
+  "dependencies": {
+    "hono": "^4.6.14"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.1.14"
+  }
+}
