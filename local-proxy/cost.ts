@@ -20,9 +20,18 @@ const PRICING: Record<string, ModelRates> = {
   'claude-3-5-haiku':  { input:  0.8, output:  4, cache_read: 0.08, cache_creation:  1.0  },
 }
 
+// Tracks unknown model IDs we've already warned about so one surprise
+// doesn't become a log flood. Scoped to the module so resetForTesting
+// clears it too (see below).
+let loggedUnknown = new Set<string>()
+
 function ratesFor(model: string): ModelRates | undefined {
   for (const prefix of Object.keys(PRICING)) {
     if (model.startsWith(prefix)) return PRICING[prefix]
+  }
+  if (process.env.DEBUG === '1' && !loggedUnknown.has(model)) {
+    loggedUnknown.add(model)
+    console.log('[proxy] unknown model for pricing:', model)
   }
   return undefined
 }
@@ -148,4 +157,5 @@ export function snapshot(): StatsSnapshot {
 
 export function resetForTesting(): void {
   state = { startedAt: Date.now(), byModel: new Map() }
+  loggedUnknown = new Set<string>()
 }
